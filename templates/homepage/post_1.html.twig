@@ -1,0 +1,11 @@
+<h4>
+    {% if user_id == user.id %}
+        {{post.firstname}} {{post.lastname}}
+    {% else %}
+        <a href="#">{{post.firstname}} {{post.lastname}}</a>
+    {% endif %}
+</h4>
+<p>
+    {{ post.main_text}}
+</p>
+

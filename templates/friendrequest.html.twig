@@ -1,0 +1,18 @@
+{% extends "homepage.html.twig"%}
+{% block h2 %}Gestisci le tue richieste di amicizia.{% endblock %}
+{% block content %}
+    {% for u in usersRows%}
+        <div class="well friend-list">
+            <div class="col-xs-10 col-table-cell col-middle">
+                <h2 class="no-margin">{{ u.lastname }} {{ u.firstname }}</h2>
+            </div>
+            <div class="col-xs-2 col-table-cell col-middle text-right switch">
+                <a class="btn btn-primary btn-lg" href="index.php?page=friendrequest&accept={{ u.id }}">Accetta amicizia <span class="glyphicon glyphicon-user"></span></a>
+            </div>
+       </div>
+            
+            {% else %}
+                <h2>Non ci sono amicizie pendenti.</h2>
+    {% endfor %}
+    
+{% endblock %}

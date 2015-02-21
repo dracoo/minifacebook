@@ -1,0 +1,84 @@
+{% extends "homepage.html.twig"%}
+{% block h2 %}Modifica qui le tue informazioni personali.<br>Saranno visibili solo a te e ai tuoi amici!{% endblock %}
+{% block content %}
+    <form class="form-horizontal" autocomplete="off" novalidate="novalidate" action="index.php" method="POST" role="form">
+        <fieldset>
+            <legend>Dati anagrafici</legend>
+            <div class="form-group form-group-lg">
+                <label for="myuser_birthdate" class="col-sm-2 control-label">Data di nascita</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Data di nascita" id="myuser_birthdate" name="myuser[birthdate]" value="{{ birthdate }}">
+                    {% if errors.birthdate %}
+                        <div class="text-danger">{{ errors.birthdate }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group form-group-lg">
+                <label for="myuser_birthplace" class="col-sm-2 control-label">Luogo di nascita</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Luogo di nascita" id="myuser_birthplace" name="myuser[birthplace]" value="{{ birthplace }}">
+                    {% if errors.birthplace %}
+                        <div class="text-danger">{{ errors.birthplace }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group form-group-lg">
+                <label class="col-sm-2 control-label">Sesso</label>
+                <div class="col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" id="myuser_gender_1" name="myuser[gender]" value="1"> Uomo
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" id="myuser_gender_2" name="myuser[gender]" value="2"> Donna
+                    </label>
+                    {% if errors.gender %}
+                        <div class="text-danger">{{ errors.gender }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </fieldset>
+        <fieldset>
+            <legend>Residenza</legend>
+            <div class="form-group form-group-lg">
+                <label for="myuser_domicile_city" class="col-sm-2 control-label">Città</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Città" id="myuser_domicile_city" name="myuser[domicile_city]" value="{{ domicile_city }}">
+                    {% if errors.domicile_city %}
+                        <div class="text-danger">{{ errors.domicile_city }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group form-group-lg">
+                <label for="myuser_domicile_province" class="col-sm-2 control-label">Provincia</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Provincia" id="myuser_domicile_province" name="myuser[domicile_province]" value="{{ domicile_province }}">
+                    {% if errors.domicile_province %}
+                        <div class="text-danger">{{ errors.domicile_province }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group form-group-lg">
+                <label for="myuser_domicile_state" class="col-sm-2 control-label">Stato</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Stato" id="myuser_domicile_state" name="myuser[domicile_state]" value="{{ domicile_state }}">
+                    {% if errors.domicile_state %}
+                        <div class="text-danger">{{ errors.domicile_state }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </fieldset>
+
+        {% if okay %}
+            <div class="alert alert-success">Utente registrato correttamente</div>
+        {% endif %}
+        {% if errors.generic %}
+            <div class="alert alert-danger">{{ errors.generic }}</div>
+        {% endif %}
+        <div class="form-group form-group-lg">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-lg btn-primary">Aggiorna</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

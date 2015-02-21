@@ -1,0 +1,124 @@
+{% extends "base.html.twig"%}
+{% block body %}
+    <div class="row">
+        <div class="col-sm-4 jumbotron">
+            <h2>Ciao {{ user.firstname }}</h2>
+            <p>{% block h2 %}Benvenut{% if user.gender == 2 %}a{% else %}o{% endif %} su miniFacebook{% endblock%}</p>
+        </div>
+        <div class="col-sm-8">
+            {% block content %}
+                <div role="tabpanel" id="mfpost">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="{% if show == 'stato' %}active{% endif%}"><a href="#stato" aria-controls="stato" role="tab" data-toggle="tab">Stato <span class="glyphicon glyphicon-pencil"></span></a></li>
+                        <li role="presentation" class="{% if show == 'foto' %}active{% endif%}"><a href="#foto" aria-controls="foto" role="tab" data-toggle="tab">Foto <span class="glyphicon glyphicon-picture"></span></a></li>
+                        <li role="presentation" class="{% if show == 'luogo' %}active{% endif%}"><a href="#luogo" aria-controls="luogo" role="tab" data-toggle="tab">Luogo <span class="glyphicon glyphicon-map-marker"></span></a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane {% if show =='stato' %}active{% endif%}" id="stato">
+                            <form class="panel panel-default" autocomplete="off" novalidate="novalidate" action="index.php?page=homepage" method="POST" role="form">
+                                <div class="panel-body">
+                                    {% if statoErrors.generic %}
+                                        <div class="alert alert-danger">{{ statoErrors.generic }}</div>
+                                    {% endif %}                                    
+                                    <div class="form-group form-group-lg">
+                                        <input type="text" class="form-control" placeholder="A cosa stai pensando?" id="mfbpost_stato" name="mfbpost[main_text]" maxlength="100" value="{{ stato.main_text}}">
+                                        {% if statoErrors.stato %}
+                                            <div class="text-danger">{{ statoErrors.stato }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group form-group-lg">
+                                        <button type="submit" class="btn btn-lg btn-primary" name="mfpost_form" value="stato">Aggiorna stato</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div role="tabpanel" class="tab-pane {% if show =='foto' %}active{% endif%}" id="foto">
+                            <form class="panel panel-default" autocomplete="off" novalidate="novalidate" action="index.php?page=homepage" method="POST" role="form">
+                                <div class="panel-body">
+                                    {% if fotoErrors.generic %}
+                                        <div class="alert alert-danger">{{ fotoErrors.generic }}</div>
+                                    {% endif %}                                     
+                                    <div class="form-group form-group-lg">
+                                        <input type="text" class="form-control" placeholder="Che foto vuoi inserire?" id="mfbpost_foto" name="mfbpost[main_text]" maxlength="255" value="{{ foto.main_text}}">
+                                        {% if fotoErrors.foto %}
+                                            <div class="text-danger">{{ fotoErrors.foto }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-sm-9 ">
+                                            <input type="text" class="form-control" placeholder="Descrivi la foto" id="mfbpost_foto_desc" name="mfbpost[second_text]" maxlength="50" value="{{ foto.second_text}}">
+                                            {% if fotoErrors.foto_desc %}
+                                                <div class="text-danger">{{ fotoErrors.foto_desc }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group col-sm-3 text-right">
+                                            <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#mfbtag" aria-expanded="false" aria-controls="mfbtag">
+                                                Aggiungi tag
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="collapse" id="mfbtag">
+                                        <div class="well">
+                                            <strong>Spunta la casella di fianco al nome dell'amico che vuoi taggare</strong><br>
+                                            {% for friend in friends %}
+                                                <label class="checkbox-inline">
+                                                    <input type="checkbox" id="myuser_gender_1" name="mfbpost[tag][]" value="{{ friend.id }}"> {{ friend.firstname }} {{ friend.lastname }}
+                                                </label>
+                                            {% else %}
+                                                Non hai amici da taggare. <a href="index.php?page=search">Aggiungine qualcuno</a>!
+                                            {% endfor %}
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-lg">
+                                        <button type="submit" class="btn btn-lg btn-primary" name="mfpost_form" value="foto">Aggiungi foto</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div role="tabpanel" class="tab-pane {% if show =='luogo' %}active{% endif%}" id="luogo">
+                            <form class="panel panel-default" autocomplete="off" novalidate="novalidate" action="index.php?page=homepage" method="POST" role="form">
+                                <div class="panel-body">
+                                    {% if luogoErrors.generic %}
+                                        <div class="alert alert-danger">{{ luogoErrors.generic }}</div>
+                                    {% endif %}                                      
+                                    <div class="form-group form-group-lg">
+                                        <input type="text" class="form-control" placeholder="Nome del luogo" id="mfbpost_luogo" name="mfbpost[main_text]" maxlength="100" value="{{ luogo.main_text}}">
+                                        {% if luogoErrors.luogo %}
+                                            <div class="text-danger">{{ luogoErrors.luogo }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-xs-6">
+                                            <input type="text" class="form-control" placeholder="Latitudine" id="mfbpost_luogo" name="mfbpost[latitude]" value="{{ luogo.latitude}}">
+                                            {% if luogoErrors.latitude %}
+                                                <div class="text-danger">{{ luogoErrors.latitude }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group col-xs-6">
+                                            <input type="text" class="form-control" placeholder="Longitudine" id="mfbpost_luogo" name="mfbpost[longitude]" value="{{ luogo.longitude}}">
+                                            {% if luogoErrors.longitude %}
+                                                <div class="text-danger">{{ luogoErrors.longitude }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-group-lg">
+                                        <button type="submit" class="btn btn-lg btn-primary" name="mfpost_form" value="luogo">Aggiungi luogo</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% for post in posts %}
+                    <div class="panel panel-default">
+                        <div class="panel-body {% if loop.first %}bg-success{% endif %}">
+                            {% include "homepage\\post_" ~ post.type ~ ".html.twig" with {'post': post, 'user_id': user.id } %}
+                            <div class="small text-right">{{ post.createdat|date('d/m/Y H:i:s')}}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html.twig"%}
+{% block body %}
+    <div class="jumbotron">
+        <h1>Benvenuto su miniFacebook</h1>
+        <p>Per accedere al sito <a href="#register">registrati</a> o fai il <a href="#login">login</a>.</p>
+    </div>
+    <div class="row">
+        <a name="login"></a>
+        {% include "index\\login.html.twig" with {'email': login.email, 'errors': loginErrors } %}
+        <a name="register"></a>
+        {% include "index\\register.html.twig" with {'firstname': register.firstname, 'lastname': register.lastname, 'email': register.email, 'errors': registerErrors, 'okay': registerOkay } %}
+    </div>
+{% endblock %}

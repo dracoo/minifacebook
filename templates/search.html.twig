@@ -1,0 +1,37 @@
+{% extends "homepage.html.twig"%}
+{% block h2 %}Scopri chi tra i tuoi amici è su miniFacebook e chiedigli l'amicizia!{% endblock %}
+{% block content %}
+    {% for u in usersRows%}
+        <div class="well friend-list">
+            <div class="col-xs-10 col-table-cell col-middle">
+                <h2 class="no-margin">{{ u.lastname }} {{ u.firstname }}</h2>
+            </div>
+            <div class="col-xs-2 col-table-cell col-middle text-right switch">
+                {% if u.sentat and u.acceptedat %}
+                    <button class="btn btn-lg btn-primary switch-normal">Amici 
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </button>
+                    <button class="btn btn-lg btn-danger switch-hover">Amici 
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                {% elseif u.sentat and u.sender_id == user.id %}
+                    <button class="btn btn-default btn-lg switch-normal">Richiesta inviata 
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </button>
+                    <button class="btn btn-danger btn-lg switch-hover" >Richiesta inviata 
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>                    
+                {% elseif u.sentat and u.sender_id != user.id %}       
+                    <button class="btn btn-default btn-lg switch-normal">In attesa di conferma 
+                        <span class="glyphicon glyphicon-user"></span>
+                    </button>
+                    <a class="btn btn-primary btn-lg switch-hover" href="index.php?page=friendrequest">Vai alla pagina "Richieste di amicizia"
+                        <span class="glyphicon glyphicon-user"></span>
+                    </a> 
+                {% else %}
+                    <a class="btn btn-primary btn-lg" href="index.php?page=search&friend={{ u.id }}">Richiedi amicizia <span class="glyphicon glyphicon-user"></span></a>
+                    {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

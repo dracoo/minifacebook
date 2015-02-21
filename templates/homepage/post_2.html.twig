@@ -1,0 +1,13 @@
+<h4>
+    <span class="glyphicon glyphicon-picture"></span> 
+    {% if user_id == user.id %}
+        {{post.firstname}} {{post.lastname}}
+    {% else %}
+        <a href="#">{{post.firstname}} {{post.lastname}}</a>
+    {% endif %}
+</h4>
+<p>
+    {{ post.second_text }}<br>
+    <img src="{{ post.main_text}}" alt=""><br>
+    <small>Url: <a href="{{ post.main_text}}" target="_blank">{{ post.main_text}}</a></small>
+</p>

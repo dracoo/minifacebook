@@ -1,0 +1,58 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+
+a, a:link, a:active, a:hover, a:visited, button {
+    outline:none!important;
+}
+
+.no-margin {
+    margin:0;
+}
+
+.col-table-cell {
+    display:table-cell;
+    float:none;
+}
+.col-top {
+    vertical-align:top;
+}
+.col-middle {
+    vertical-align:middle;
+}
+.col-bottom {
+    vertical-align:bottom;
+}
+
+#mfpost .tab-pane .panel {
+    border-top:0;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+.friend-list .switch .switch-hover {
+    display: none;
+}
+
+.friend-list .switch:hover .switch-hover {
+    display: inline-block;
+}
+
+.friend-list .switch:hover .switch-normal {
+    display: none;
+}

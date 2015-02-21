@@ -1,0 +1,12 @@
+<h4>
+    <span class="glyphicon glyphicon-map-marker"></span> 
+    {% if user_id == user.id %}
+        {{post.firstname}} {{post.lastname}}
+    {% else %}
+        <a href="#">{{post.firstname}} {{post.lastname}}</a>
+    {% endif %}
+</h4>
+<p>
+    {{ post.main_text}}
+</p>
+<small>Lat: {{ post.latitude }}, Long: {{ post.longitude }}</small>

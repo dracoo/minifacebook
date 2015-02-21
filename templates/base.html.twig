@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>{% block title %}miniFacebook{% endblock %}</title>
+        {% block stylesheets %}
+            <link href="css/bootstrap.min.css" rel="stylesheet">
+            <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+            <link href="css/style.css" rel="stylesheet">
+            <!--[if lt IE 9]>
+              <script src="js/html5shiv.min.js"></script>
+              <script src="js/respond.min.js"></script>
+            <![endif]-->        
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    </head>
+    <body role="document">
+        {% block menu %}
+            {% include 'menu\\navbar.html.twig' %}
+        {% endblock %}
+        <div class="container theme-showcase" role="main">
+        {% block body %}{% endblock %}
+    </div>
+    {% block javascripts %}
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>        
+    {% endblock %}
+</body>
+</html>
