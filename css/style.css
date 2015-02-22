@@ -60,3 +60,7 @@ a, a:link, a:active, a:hover, a:visited, button {
 .switch:hover .switch-normal {
     display: none;
 }
+
+.full-width {
+    width: 100%;
+}

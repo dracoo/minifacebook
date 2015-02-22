@@ -118,7 +118,7 @@
                 {% for post in posts %}
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            {% include "homepage\\post_" ~ post.type ~ ".html.twig" with {'post': post, 'user_id': user.id, 'comments': comments, 'tags': tags } %}
+                            {% include "homepage\\post_" ~ post.type ~ ".html.twig" with {'post': post, 'user_id': user.id, 'comments': comments, 'tags': tags, 'isVip': isVip } %}
                             <div class="small text-right">{{ post.createdat|date('d/m/Y H:i:s')}}</div>
                         </div>
                     </div>

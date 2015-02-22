@@ -189,8 +189,44 @@ class Router {
         }
     }
 
+    public function sendcommentAction() {
+        $user = $this->init->checkLogin();
+
+        if (!$this->init->isVip()) {
+            return $this->init->gotoHomepage();
+        }
+        $post_id = filter_input(INPUT_POST, 'post_id');
+        $post_user_id = filter_input(INPUT_POST, 'post_user_id');
+        $comment = filter_input(INPUT_POST, 'comment');
+
+        if ($post_user_id != $user['id']) {
+            $postOwner = $this->init->getUser($post_user_id);
+            if (!$postOwner) {
+                return $this->init->gotoHomepage();
+            }
+
+            if (!$this->init->isFriend($post_user_id, $user['id'], true)) {
+                return $this->init->gotoHomepage();
+            }
+        }
+
+        $comment = trim($comment);
+        if (!$comment) {
+            return $this->init->redirect("index.php?page=homepage#stato" . $post_id . "_" . $post_user_id);
+        }
+        
+        $posts = $this->init->pgSelect('post', array('id' => $post_id, 'user_id' => $post_user_id, 'type' => self::MFPOST_STATO));
+        if ($posts) {
+            $this->init->pgInsert('comment', array('responder_id' => $user['id'], 'post_id' => $post_id, 'post_user_id' => $post_user_id, 'content' => $comment, 'createdat' => date('Y-m-d H:i:s')));
+            return $this->init->redirect("index.php?page=homepage#stato" . $post_id . "_" . $post_user_id);
+        } else {
+            return $this->init->gotoHomepage();
+        }
+    }
+
     public function homepageAction() {
         $user = $this->init->checkLogin();
+        $isVip = $this->init->isVip();
         $show = 'stato';
 
         $stato = array('main_text' => '', 'second_text' => '');
@@ -309,31 +345,39 @@ class Router {
         $posts = pg_execute($this->init->getConn(), "getPost", array($user['id']));
         $postsRows = pg_fetch_all($posts);
 
+        $tags = array();
         $tagsWhere = array();
         $commentsWhere = array();
+        $comments = array();
 
-        foreach ($postsRows as $pRow) {
-            if ($pRow['type'] == self::MFPOST_FOTO) {
-                $tagsWhere[] = '(t.post_id = ' . $pRow['id'] . ' AND t.post_user_id = ' . $pRow['user_id'] . ')';
-            } elseif ($pRow['type'] == self::MFPOST_STATO) {
-                $commentsWhere[] = '(c.post_id = ' . $pRow['id'] . ' AND c.post_user_id = ' . $pRow['user_id'] . ')';
+        if ($postsRows) {
+            foreach ($postsRows as $pRow) {
+                if ($pRow['type'] == self::MFPOST_FOTO) {
+                    $tagsWhere[] = '(t.post_id = ' . $pRow['id'] . ' AND t.post_user_id = ' . $pRow['user_id'] . ')';
+                } elseif ($pRow['type'] == self::MFPOST_STATO) {
+                    $commentsWhere[] = '(c.post_id = ' . $pRow['id'] . ' AND c.post_user_id = ' . $pRow['user_id'] . ')';
+                }
+            }
+
+            /* retrieve tag */
+            if ($tagsWhere) {
+                $sqlTag = 'SELECT u.firstname, t.tagged_id, t.post_id, t.post_user_id FROM tag AS t JOIN "user" AS u ON t.tagged_id = u.id WHERE ' . implode(' OR ', $tagsWhere);
+                $tagsResult = pg_query($this->init->getConn(), $sqlTag);
+                $tags = pg_fetch_all($tagsResult);
+            }
+
+            /* retrieve comment */
+            if ($commentsWhere) {
+                $sqlComment = 'SELECT u.firstname, u.lastname, c.* FROM comment AS c JOIN "user" AS u ON c.responder_id = u.id WHERE ' . implode(' OR ', $commentsWhere) . ' ORDER BY c.createdat ASC';
+                $commentsResult = pg_query($this->init->getConn(), $sqlComment);
+                $comments = pg_fetch_all($commentsResult);
             }
         }
-
-        /* retrieve tag */
-        $sqlTag = 'SELECT u.firstname, u.id, t.post_id, t.post_user_id FROM tag AS t JOIN "user" AS u ON t.tagged_id = u.id WHERE ' . implode(' OR ', $tagsWhere);
-        $tagsResult = pg_query($this->init->getConn(), $sqlTag);
-        $tags = pg_fetch_all($tagsResult);
-
-        /* retrieve comment */
-        $sqlComment = 'SELECT u.firstname, u.id, c.* FROM comment AS c JOIN "user" AS u ON c.responder_id = u.id WHERE ' . implode(' OR ', $commentsWhere) . ' ORDER BY c.createdat ASC';
-        $commentsResult = pg_query($this->init->getConn(), $sqlComment);
-        $comments = pg_fetch_all($commentsResult);
-
         $friends = $this->init->getFriends(true);
 
         return $this->render('homepage.html.twig', array(
                     'user' => $user,
+                    'isVip' => $isVip,
                     'stato' => $stato,
                     'statoErrors' => $statoErrors,
                     'foto' => $foto,

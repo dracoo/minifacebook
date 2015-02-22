@@ -15,7 +15,7 @@
         {% for tag in tags %}
             {% if tag.post_user_id == post.user_id and tag.post_id == post.id %}
                 {% set noFlag = false %}
-                <a href="index.php?page=profile&user_id={{tag.id}}">{{ tag.firstname }}</a>{% if not loop.last %},{% endif %}
+                <a href="index.php?page=profile&user_id={{tag.tagged_id}}">{{ tag.firstname }}</a>{% if not loop.last %},{% endif %}
             {% endif %}
         {% endfor %}
         {% if noFlag %}

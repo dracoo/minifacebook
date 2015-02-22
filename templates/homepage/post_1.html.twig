@@ -1,3 +1,4 @@
+<a name="stato{{post.id}}_{{post.user_id}}"></a>
 <h4>
     {% if user_id == post.user_id %}
         {{post.firstname}} {{post.lastname}}
@@ -8,4 +9,35 @@
 <p>
     {{ post.main_text}}
 </p>
+<div class="panel panel-default">
+    <div class="panel-heading">Commenti</div>
+    <div class="panel-body">
+        {% for co in comments %}
+            {% if co.post_user_id == post.user_id and co.post_id == post.id %}
+                <div class="well well-sm">
+                    <small>{{ co.createdat|date('d/m/Y H:i:s') }}</small><br>
+                    {% if user_id == co.responder_id %}
+                        <strong>{{ co.firstname }} {{ co.lastname }}</strong>:
+                    {% else %}
+                        <strong><a href="index.php?page=profile&user_id={{co.responder_id}}">{{ co.firstname }} {{ co.lastname }}</a></strong>:
+                    {% endif %}
+                    {{ co.content}}
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% if isVip %}
+            <form role="form" class="form" method="POST" action="index.php?page=sendcomment">
+                <div class="form-group">
+                    <input type="text" name="comment" class="form-control" placeholder="Inserisci un commento">
+                </div>
+                <div class="form-group text-right">
+                    <button type="submit" class="btn btn-primary">Invia commento</button>
+                </div>
+                <input type="hidden" name="post_id" value="{{post.id}}">
+                <input type="hidden" name="post_user_id" value="{{post.user_id}}">
+            </form>
+        {% endif %}
+    </div>
+</div>    
+
 
