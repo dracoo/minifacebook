@@ -9,10 +9,9 @@
             <div class="col-xs-2 col-table-cell col-middle text-right switch">
                 <a class="btn btn-primary btn-lg" href="index.php?page=friendrequest&accept={{ u.id }}">Accetta amicizia <span class="glyphicon glyphicon-user"></span></a>
             </div>
-       </div>
-            
-            {% else %}
-                <h2>Non ci sono richiesta di amicizia pendenti.</h2>
+        </div>
+    {% else %}
+        <h2>Non ci sono richiesta di amicizia pendenti.</h2>
     {% endfor %}
-    
+
 {% endblock %}

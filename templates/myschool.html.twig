@@ -1,0 +1,82 @@
+{% extends "homepage.html.twig"%}
+{% block h2 %}Gestisci la tua carriera scolastica!{% endblock %}
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <form class="form-horizontal" autocomplete="off" novalidate="novalidate" action="index.php?page=myschool" method="POST" role="form">
+                {% if okay %}
+                    <div class="alert alert-success">Nuova voce inserita nella tua carriera scolastica</div>
+                {% endif %}
+                {% if errors.generic %}
+                    <div class="alert alert-danger">{{ errors.generic }}</div>
+                {% endif %}        
+                <fieldset>
+                    <legend>Aggiungi una scuola alla tua carriera scolastica</legend>
+                    <div class="form-group form-group-lg">
+                        <label for="school_name" class="col-sm-2 control-label">Scuola</label>
+                        <div class="col-sm-10">
+                            <select name="myschool[school_id]" class="form-control">
+                                <option value=""></option>
+                                {% for school in schools %}
+                                    <option value="{{ school.id }}" {% if school.id == form.school_id %}selected="selected"{% endif%}>{{ school.name }} - {{ school.address }}, {{ school.city }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if errors.school_id %}
+                                <div class="text-danger">{{ errors.school_id }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group form-group-lg">
+                        <label for="year_begin" class="col-sm-2 control-label">Anno inizio</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Anno inizio" id="form_year_begin" name="myschool[year_begin]" value="{{ form.year_begin }}">
+                            {% if errors.year_begin %}
+                                <div class="text-danger">{{ errors.year_begin }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group form-group-lg">
+                        <label for="form_year_end" class="col-sm-2 control-label">Anno fine</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Anno fine" id="form_year_end" name="myschool[year_end]" value="{{ form.year_end }}">
+                            {% if errors.year_end %}
+                                <div class="text-danger">{{ errors.year_end }}</div>
+                            {% endif %}
+                        </div>
+                    </div>                
+                    <div class="form-group form-group-lg">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-lg btn-primary">Aggiungi</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+    {% for ms in myschools %}
+        <div class="well">
+            <div class="row">
+                <div class="col-xs-10">
+                    <h2 class="no-margin">{{ms.name}}</h2>
+                    <strong>{{ms.address}}, {{ms.city}}</strong>
+                    <p>
+                        {% if ms.year_end and ms.year_end != ms.year_begin %}
+                            <small>Dal {{ ms.year_begin }} al {{ ms.year_end }}</small>
+                        {% elseif ms.year_end and ms.year_end == ms.year_begin %}
+                            <small>Nel {{ ms.year_begin }}</small>
+                        {% else%}
+                            <small>Dal {{ ms.year_begin }} - in corso</small>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-xs-2 text-right">
+                    <a class="btn btn-danger btn-sm" href="index.php?page=myschool&remove={{ ms.removeid }}"><span class="glyphicon glyphicon-remove"></span></a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <h2>Non hai specificato nessuna scuola nella tua carriera.</h2>
+    {% endfor%}
+{% endblock %}

@@ -55,6 +55,23 @@ receiver_id int not null,
 sentat timestamp  not null,
 acceptedat timestamp,
 PRIMARY KEY (sender_id, receiver_id),
-FOREIGN KEY (sender_id ) REFERENCES "user" (id),
-FOREIGN KEY (receiver_id ) REFERENCES "user" (id)
+FOREIGN KEY (sender_id) REFERENCES "user" (id),
+FOREIGN KEY (receiver_id) REFERENCES "user" (id)
+);
+
+create table "school" (
+id serial PRIMARY KEY,
+"name" varchar(255) not null,
+address varchar(255) not null,
+city varchar(255) not null
+);
+
+create table "user_school" (
+id serial PRIMARY KEY,
+school_id int not null,
+user_id int not null,
+year_begin int not null,
+year_end int,
+FOREIGN KEY (school_id) REFERENCES "school" (id),
+FOREIGN KEY (user_id) REFERENCES "user" (id)
 );

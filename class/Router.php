@@ -214,7 +214,7 @@ class Router {
         if (!$comment) {
             return $this->init->redirect("index.php?page=homepage#stato" . $post_id . "_" . $post_user_id);
         }
-        
+
         $posts = $this->init->pgSelect('post', array('id' => $post_id, 'user_id' => $post_user_id, 'type' => self::MFPOST_STATO));
         if ($posts) {
             $this->init->pgInsert('comment', array('responder_id' => $user['id'], 'post_id' => $post_id, 'post_user_id' => $post_user_id, 'content' => $comment, 'createdat' => date('Y-m-d H:i:s')));
@@ -530,7 +530,128 @@ class Router {
         }
 
         $friendship = $this->init->getFriendship($user_id, $user['id']);
-        return $this->render('profile.html.twig', array('user' => $user, 'profileUser' => $profileUser, 'friendship' => $friendship));
+
+
+
+        $sql = 'SELECT s.*, us.year_begin, us.year_end FROM user_school AS us JOIN school s ON us.school_id = s.id WHERE us.user_id = $1 ORDER BY us.year_begin DESC, us.year_end DESC, s."name" ASC';
+        pg_prepare($this->init->getConn(), "", $sql);
+        $schoolsresult = pg_execute($this->init->getConn(), "", array($user_id));
+        $schools = pg_fetch_all($schoolsresult);
+
+        return $this->render('profile.html.twig', array('user' => $user, 'profileUser' => $profileUser, 'friendship' => $friendship, 'schools' => $schools));
+    }
+
+    public function addschoolAction() {
+        $user = $this->init->checkLogin();
+
+        $school = array('name' => '', 'address' => '', 'city' => '');
+        $okay = $this->init->getSession('school_okay', true);
+        $errors = array();
+
+        if ($this->isPost()) {
+            $post = filter_input_array(INPUT_POST);
+            $school = array_merge($school, (array) $post['school']);
+
+            $name = trim($school['name']);
+            if ($name === "") {
+                $errors['name'] = 'Campo obbligatorio';
+            } else {
+                $school['name'] = $name;
+            }
+
+            $address = trim($school['address']);
+            if ($address === "") {
+                $errors['address'] = 'Campo obbligatorio';
+            } else {
+                $school['address'] = $address;
+            }
+
+            $city = trim($school['city']);
+            if ($city === "") {
+                $errors['city'] = 'Campo obbligatorio';
+            } else {
+                $school['city'] = $city;
+            }
+
+            if (!$errors) {
+                $check = $this->init->pgSelect('school', $school);
+
+                if ($check === false) {
+                    $this->init->pgInsert('school', $school);
+                    $this->init->setSession('school_okay', true);
+
+                    return $this->init->redirect('index.php?page=addschool');
+                } else {
+                    $errors['generic'] = 'Esiste già una scuola con gli stessi dati.';
+                }
+            }
+        }
+
+        return $this->render('addschool.html.twig', array('user' => $user, 'school' => $school, 'okay' => $okay, 'errors' => $errors));
+    }
+
+    public function myschoolAction() {
+        $user = $this->init->checkLogin();
+
+        $schoolrestult = pg_query($this->init->getConn(), 'SELECT * FROM school ORDER BY name ASC');
+        $schools = pg_fetch_all($schoolrestult);
+
+        $form = array('school_id' => '', 'year_begin' => '', 'year_end' => '');
+        $okay = $this->init->getSession('myschool_okay', true);
+        $errors = array();
+
+        $remove = filter_input(INPUT_GET, 'remove');
+
+        if ($remove) {
+            pg_delete($this->init->getConn(), 'user_school', array('id' => $remove, 'user_id' => $user['id']));
+        }
+
+        $sql = 'SELECT s.*, us.id AS removeid, us.year_begin, us.year_end FROM user_school AS us JOIN school s ON us.school_id = s.id WHERE us.user_id = $1 ORDER BY us.year_begin DESC, us.year_end DESC, s."name" ASC';
+        pg_prepare($this->init->getConn(), "", $sql);
+        $myschoolsresult = pg_execute($this->init->getConn(), "", array($user['id']));
+
+        $myschools = pg_fetch_all($myschoolsresult);
+
+        if ($this->isPost()) {
+            $post = filter_input_array(INPUT_POST);
+            $form = array_merge($form, (array) $post['myschool']);
+
+            if (!$form['school_id']) {
+                $errors['school_id'] = 'Campo obbligatorio';
+            }
+
+            $year_begin = trim($form['year_begin']);
+            if ($year_begin === "") {
+                $errors['year_begin'] = 'Campo obbligatorio';
+            } else {
+                $year_begin = (int) $year_begin;
+
+                $year_end = trim($form['year_end']);
+                if ($year_end) {
+                    if ((int) $year_end < $year_begin) {
+                        $errors['year_end'] = "L'anno di fine non può essere minore dell'anno di inizio";
+                    } else {
+                        $form['year_end'] = (int) $year_end;
+                    }
+                }
+            }
+
+            if (!$errors) {
+                $checkSchool = $form;
+                $checkSchool['user_id'] = $user['id'];
+                $check = $this->init->pgSelect('user_school', $checkSchool);
+                if ($check === false) {
+                    $this->init->pgInsert('user_school', $checkSchool);
+                    $this->init->setSession('myschool_okay', true);
+
+                    return $this->init->redirect('index.php?page=myschool');
+                } else {
+                    $errors['generic'] = 'Hai già frequentato questa scuola in questo stesso periodo';
+                }
+            }
+        }
+
+        return $this->render('myschool.html.twig', array('user' => $user, 'schools' => $schools, 'form' => $form, 'errors' => $errors, 'okay' => $okay, 'myschools' => $myschools));
     }
 
     public function logoutAction() {

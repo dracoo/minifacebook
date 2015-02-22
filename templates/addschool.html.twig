@@ -1,0 +1,51 @@
+{% extends "homepage.html.twig"%}
+{% block h2 %}Aggiungi una scuola cosicché tutti la possano indicare nella propria carriera scolastica!{% endblock %}
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form class="form-horizontal" autocomplete="off" novalidate="novalidate" action="index.php?page=addschool" method="POST" role="form">
+                {% if okay %}
+                    <div class="alert alert-success">Nuova scuola creata</div>
+                {% endif %}
+                {% if errors.generic %}
+                    <div class="alert alert-danger">{{ errors.generic }}</div>
+                {% endif %}        
+                <fieldset>
+                    <legend>Nuova scuola</legend>
+                    <div class="form-group form-group-lg">
+                        <label for="school_name" class="col-sm-2 control-label">Nome</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Nome" id="school_name" name="school[name]" value="{{ school.name }}">
+                            {% if errors.name %}
+                                <div class="text-danger">{{ errors.name }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group form-group-lg">
+                        <label for="school_address" class="col-sm-2 control-label">Indirizzo</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Indirizzo" id="school_address" name="school[address]" value="{{ school.address }}">
+                            {% if errors.address %}
+                                <div class="text-danger">{{ errors.address }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group form-group-lg">
+                        <label for="school_city" class="col-sm-2 control-label">Città</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" placeholder="Città" id="school_city" name="school[city]" value="{{ school.city }}">
+                            {% if errors.city %}
+                                <div class="text-danger">{{ errors.city }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group form-group-lg">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-lg btn-primary">Aggiungi</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -72,5 +72,23 @@
                 </div>
             {% endif %}
         </div>
+        {% for ms in schools %}
+            <h2>Scuole frequentate</h2>
+            <div class="well">
+                <h3>{{ms.name}}</h3>
+                <strong>{{ms.address}}, {{ms.city}}</strong>
+                <p>
+                    {% if ms.year_end and ms.year_end != ms.year_begin %}
+                        <small>Dal {{ ms.year_begin }} al {{ ms.year_end }}</small>
+                    {% elseif ms.year_end and ms.year_end == ms.year_begin %}
+                        <small>Nel {{ ms.year_begin }}</small>
+                    {% else%}
+                        <small>Dal {{ ms.year_begin }} - in corso</small>
+                    {% endif %}
+                </p>
+            </div>
+        {% else %}
+            <h2>{{ profileUser.firstname }} non ha indicato nessuna scuola che ha frequentato.</h2>
+        {% endfor%}
     {% endif %}
 {% endblock %}

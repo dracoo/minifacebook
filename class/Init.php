@@ -155,7 +155,7 @@ class Init {
      * @param array $assoc_array
      * @return boolean
      */
-    public function pgSelect($table_name, $assoc_array) {
+    public function pgSelect($table_name, $assoc_array = array()) {
         return pg_select($this->getConn(), $table_name, $assoc_array);
     }
 
