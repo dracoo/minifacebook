@@ -119,7 +119,6 @@ class Init {
     
     public function isVip() {
         $user = $this->checkLogin();
-        
         return $user['vip'] == "t";
     }
 

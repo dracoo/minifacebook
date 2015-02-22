@@ -96,7 +96,7 @@ class Router {
                 if ($friends && count($friends) >= 3) {
                     pg_update($this->init->getConn(), 'user', array('vip' => true), array('id' => $return[0]['id']));
                 } else {
-                    pg_update($this->init->getConn(), 'user', array('vip' => false), array('id' => $return[0]['id']));
+                    pg_update($this->init->getConn(), 'user', array('vip' => false, 'favorite_place_post_id' => null, 'favorite_place_post_user_id' => null), array('id' => $return[0]['id']));
                 }
 
                 $this->init->gotoHomepage();
@@ -294,7 +294,7 @@ class Router {
                         $luogoErrors['latitude'] = "Inserire la latitudine";
                     } else {
                         $latitude = str_replace(',', '.', $latitude);
-                        if (strpos('.', $latitude) === false) {
+                        if (strpos($latitude, '.') === false) {
                             $latitude .= '.0';
                         }
                         if (!preg_match("/^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}$/", $latitude)) {
@@ -306,7 +306,7 @@ class Router {
                         $luogoErrors['longitude'] = "Inserire la longitudine";
                     } else {
                         $longitude = str_replace(',', '.', $longitude);
-                        if (strpos('.', $longitude) === false) {
+                        if (strpos($longitude, '.') === false) {
                             $longitude .= '.0';
                         }
                         if (!preg_match("/^-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])\.{1}\d{1,6}$/", $longitude)) {
@@ -438,7 +438,14 @@ class Router {
 
     public function myuserAction() {
         $user = $this->init->checkLogin();
+        $isVip = $this->init->isVip();
         $formOrig = array('birthdate' => '', 'birthplace' => '', 'gender' => '', 'domicile_city' => '', 'domicile_province' => '', 'domicile_state' => '');
+
+        $places = array();
+        if ($isVip) {
+            $places = $this->init->pgSelect('post', array('type' => self::MFPOST_LUOGO));
+        }
+
         $okay = $this->init->getSession('myuser_okay', true);
         $form = $formOrig;
         $errors = array();
@@ -469,6 +476,23 @@ class Router {
                 }
             }
 
+            if ($isVip) {
+                $favorite_place = filter_input(INPUT_POST, 'favorite_place');
+
+                if ($favorite_place) {
+                    list($post_id, $post_user_id) = explode('_', $favorite_place);
+                    $check = $this->init->pgSelect('post', array('id' => $post_id, 'user_id' => $post_user_id, 'type' => self::MFPOST_LUOGO));
+                } else {
+                    $check = true;
+                    $post_id = null;
+                    $post_user_id = null;
+                }
+                if ($check) {
+                    $toUpdate['favorite_place_post_id'] = $post_id;
+                    $toUpdate['favorite_place_post_user_id'] = $post_user_id;
+                }
+            }
+
             if ($toUpdate) {
                 pg_update($this->init->getConn(), 'user', $toUpdate, array('id' => $user['id']));
 
@@ -478,7 +502,7 @@ class Router {
             }
         }
 
-        return $this->render('myuser.html.twig', array('user' => $user, 'form' => $form, 'okay' => $okay, 'errors' => $errors));
+        return $this->render('myuser.html.twig', array('user' => $user, 'form' => $form, 'okay' => $okay, 'errors' => $errors, 'isVip' => $isVip, 'places' => $places));
     }
 
     public function removefriendshipAction() {
@@ -521,6 +545,13 @@ class Router {
         if (!$profileUser) {
             return $this->init->gotoHomepage();
         }
+        $favorite_place = null;
+        if ($profileUser['vip'] == "t" && $profileUser['favorite_place_post_id'] && $profileUser['favorite_place_post_user_id']) {
+            $favorite_placeResult = $this->init->pgSelect('post', array('id' => $profileUser['favorite_place_post_id'], 'user_id' => $profileUser['favorite_place_post_user_id'], 'type' => self::MFPOST_LUOGO));
+            if ($favorite_placeResult) {
+                $favorite_place = $favorite_placeResult[0];
+            }
+        }
 
         $ask = filter_input(INPUT_GET, 'ask');
         if ($ask) {
@@ -531,14 +562,12 @@ class Router {
 
         $friendship = $this->init->getFriendship($user_id, $user['id']);
 
-
-
         $sql = 'SELECT s.*, us.year_begin, us.year_end FROM user_school AS us JOIN school s ON us.school_id = s.id WHERE us.user_id = $1 ORDER BY us.year_begin DESC, us.year_end DESC, s."name" ASC';
         pg_prepare($this->init->getConn(), "", $sql);
         $schoolsresult = pg_execute($this->init->getConn(), "", array($user_id));
         $schools = pg_fetch_all($schoolsresult);
 
-        return $this->render('profile.html.twig', array('user' => $user, 'profileUser' => $profileUser, 'friendship' => $friendship, 'schools' => $schools));
+        return $this->render('profile.html.twig', array('user' => $user, 'profileUser' => $profileUser, 'friendship' => $friendship, 'schools' => $schools, 'favorite_place' => $favorite_place));
     }
 
     public function addschoolAction() {

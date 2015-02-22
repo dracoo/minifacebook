@@ -72,6 +72,21 @@
                 </div>
             {% endif %}
         </div>
+
+        {% if profileUser.vip == "t" and favorite_place %}
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h2>Luogo preferito</h2>
+                            <strong>Luogo</strong>: {{favorite_place.main_text}}<br>
+                            <strong>Latitudine</strong>: {{favorite_place.latitude}}<br>
+                            <strong>Longitudine</strong>: {{ favorite_place.longitude}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
         {% for ms in schools %}
             <h2>Scuole frequentate</h2>
             <div class="well">
