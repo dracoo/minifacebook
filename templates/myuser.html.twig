@@ -52,10 +52,10 @@
                         <label class="col-sm-2 control-label">Sesso</label>
                         <div class="col-sm-10">
                             <label class="radio-inline">
-                                <input type="radio" id="myuser_gender_1" name="myuser[gender]" value="f" {% if form.gender == "f" %}checked="checked"{% endif %}> Uomo
+                                <input type="radio" id="myuser_gender_1" name="myuser[gender]" value="1" {% if form.gender == "1" %}checked="checked"{% endif %}> Uomo
                             </label>
                             <label class="radio-inline">
-                                <input type="radio" id="myuser_gender_2" name="myuser[gender]" value="t" {% if form.gender == "t" %}checked="checked"{% endif %}> Donna
+                                <input type="radio" id="myuser_gender_2" name="myuser[gender]" value="2" {% if form.gender == "2" %}checked="checked"{% endif %}> Donna
                             </label>
                             {% if errors.gender %}
                                 <div class="text-danger">{{ errors.gender }}</div>
@@ -103,7 +103,7 @@
                                     <option value=""></option>
                                     {%- for place in places -%}
                                         <option value="{{place.id}}_{{place.user_id}}" 
-                                                {%- if place.id == user.favorite_place_post_id and place.user_id == user.favorite_place_post_user_id -%}selected="selected"{%- endif -%}>
+                                                {%- if place.id == user.fav_post_id and place.user_id == user.fav_post_user_id -%}selected="selected"{%- endif -%}>
                                             {{place.main_text}}; Lat: {{place.latitude}}, Lang: {{ place.longitude}}
                                         </option>
                                     {%- endfor -%}

@@ -2,13 +2,13 @@
 {% block body %}
     <div class="row">
         <div class="col-sm-4 jumbotron">
-            <h2 {% if user.vip == "t" %} title="VIP user"{% endif %}> 
-                {% if user.vip == "t" %}
+            <h2 {% if user.vip == 1 %} title="VIP user"{% endif %}> 
+                {% if user.vip == 1 %}
                     <span class="glyphicon glyphicon-star"></span>
                 {% endif %}
                 Ciao {{ user.firstname }}
             </h2>
-            <p>{% block h2 %}Benvenut{% if user.gender == "t" %}a{% else %}o{% endif %} su miniFacebook{% endblock%}</p>
+            <p>{% block h2 %}Benvenut{% if user.gender == 2 %}a{% else %}o{% endif %} su miniFacebook{% endblock%}</p>
         </div>
         <div class="col-sm-8">
             {% block content %}

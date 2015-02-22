@@ -12,7 +12,7 @@ class Init {
         $port = 5432;
         $dbname = 'mydb';
         $user = 'postgres';
-        $password = 'c0cc0dr1ll00';
+        $password = 'milano';
 
         $conn_string = "host=$host port=$port dbname=$dbname user=$user password=$password";
         $this->conn = pg_connect($conn_string);
@@ -119,7 +119,7 @@ class Init {
     
     public function isVip() {
         $user = $this->checkLogin();
-        return $user['vip'] == "t";
+        return $user['vip'] == 1;
     }
 
     public function getUser($id = null) {

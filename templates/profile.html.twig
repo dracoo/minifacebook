@@ -44,9 +44,9 @@
                         {% if profileUser.birthplace %}
                             <strong>Luogo di nascita</strong>: {{ profileUser.birthplace }}<br>
                         {% endif %}
-                        {% if profileUser.gender == "f" %}
+                        {% if profileUser.gender == 1 %}
                             <strong>Sesso</strong>: Uomo<br>
-                        {% elseif profileUser.gender == "t" %}
+                        {% elseif profileUser.gender == 2 %}
                             <strong>Sesso</strong>: Donna<br>
                         {% endif %}
 
@@ -73,7 +73,7 @@
             {% endif %}
         </div>
 
-        {% if profileUser.vip == "t" and favorite_place %}
+        {% if profileUser.vip == 1 and favorite_place %}
             <div class="row">
                 <div class="col-sm-6">
                     <div class="panel panel-default">
@@ -87,8 +87,10 @@
                 </div>
             </div>
         {% endif %}
-        {% for ms in schools %}
+        {% if schools|length%}
             <h2>Scuole frequentate</h2>
+        {% endif %}
+        {% for ms in schools %}
             <div class="well">
                 <h3>{{ms.name}}</h3>
                 <strong>{{ms.address}}, {{ms.city}}</strong>

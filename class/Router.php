@@ -62,6 +62,9 @@ class Router {
 
         /* No errors, so far */
         if (!$registerErrors) {
+            
+            $register['vip'] = 0;
+            
             $return = $this->init->pgInsert('user', $register);
             if ($return !== true) {
                 $registerErrors['generic'] = pg_last_error($this->init->getConn());
@@ -94,9 +97,9 @@ class Router {
                 $friends = $this->init->getFriends(true);
 
                 if ($friends && count($friends) >= 3) {
-                    pg_update($this->init->getConn(), 'user', array('vip' => true), array('id' => $return[0]['id']));
+                    pg_update($this->init->getConn(), 'user', array('vip' => 1), array('id' => $return[0]['id']));
                 } else {
-                    pg_update($this->init->getConn(), 'user', array('vip' => false, 'favorite_place_post_id' => null, 'favorite_place_post_user_id' => null), array('id' => $return[0]['id']));
+                    pg_update($this->init->getConn(), 'user', array('vip' => 0, 'fav_post_id' => null, 'fav_post_user_id' => null), array('id' => $return[0]['id']));
                 }
 
                 $this->init->gotoHomepage();
@@ -488,8 +491,8 @@ class Router {
                     $post_user_id = null;
                 }
                 if ($check) {
-                    $toUpdate['favorite_place_post_id'] = $post_id;
-                    $toUpdate['favorite_place_post_user_id'] = $post_user_id;
+                    $toUpdate['fav_post_id'] = $post_id;
+                    $toUpdate['fav_post_user_id'] = $post_user_id;
                 }
             }
 
@@ -546,8 +549,8 @@ class Router {
             return $this->init->gotoHomepage();
         }
         $favorite_place = null;
-        if ($profileUser['vip'] == "t" && $profileUser['favorite_place_post_id'] && $profileUser['favorite_place_post_user_id']) {
-            $favorite_placeResult = $this->init->pgSelect('post', array('id' => $profileUser['favorite_place_post_id'], 'user_id' => $profileUser['favorite_place_post_user_id'], 'type' => self::MFPOST_LUOGO));
+        if ($profileUser['vip'] == 1 && $profileUser['fav_post_id'] && $profileUser['fav_post_user_id']) {
+            $favorite_placeResult = $this->init->pgSelect('post', array('id' => $profileUser['fav_post_id'], 'user_id' => $profileUser['fav_post_user_id'], 'type' => self::MFPOST_LUOGO));
             if ($favorite_placeResult) {
                 $favorite_place = $favorite_placeResult[0];
             }
