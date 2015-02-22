@@ -1,13 +1,25 @@
 <h4>
     <span class="glyphicon glyphicon-picture"></span> 
-    {% if user_id == user.id %}
+    {% if user_id == post.user_id %}
         {{post.firstname}} {{post.lastname}}
     {% else %}
-        <a href="#">{{post.firstname}} {{post.lastname}}</a>
+        <a href="index.php?page=profile&user_id={{post.user_id}}">{{post.firstname}} {{post.lastname}}</a>
     {% endif %}
 </h4>
 <p>
     {{ post.second_text }}<br>
     <img src="{{ post.main_text}}" alt=""><br>
-    <small>Url: <a href="{{ post.main_text}}" target="_blank">{{ post.main_text}}</a></small>
+    <small>Url: <a href="{{ post.main_text}}" target="_blank">{{ post.main_text}}</a></small><br>
+    <small>Taggati in questa nota:
+        {% set noFlag = true %}
+        {% for tag in tags %}
+            {% if tag.post_user_id == post.user_id and tag.post_id == post.id %}
+                {% set noFlag = false %}
+                <a href="index.php?page=profile&user_id={{tag.id}}">{{ tag.firstname }}</a>{% if not loop.last %},{% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if noFlag %}
+            - nessuno -
+        {% endif %}
+    </small>
 </p>

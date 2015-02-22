@@ -4,23 +4,23 @@
     {% for u in usersRows%}
         <div class="well friend-list">
             <div class="col-xs-10 col-table-cell col-middle">
-                <h2 class="no-margin">{{ u.lastname }} {{ u.firstname }}</h2>
+                <h2 class="no-margin"><a href="index.php?page=profile&user_id={{u.id}}">{{ u.lastname }} {{ u.firstname }}</a></h2>
             </div>
             <div class="col-xs-2 col-table-cell col-middle text-right switch">
                 {% if u.sentat and u.acceptedat %}
                     <button class="btn btn-lg btn-primary switch-normal">Amici 
                         <span class="glyphicon glyphicon-ok"></span>
                     </button>
-                    <button class="btn btn-lg btn-danger switch-hover">Amici 
+                    <a class="btn btn-lg btn-danger switch-hover" onclick="return confirm('Eliminare dagli amici?');" href="index.php?page=removefriendship&friend_id={{u.id}}&back=search">Amici 
                         <span class="glyphicon glyphicon-remove"></span>
-                    </button>
+                    </a>
                 {% elseif u.sentat and u.sender_id == user.id %}
                     <button class="btn btn-default btn-lg switch-normal">Richiesta inviata 
                         <span class="glyphicon glyphicon-ok"></span>
                     </button>
-                    <button class="btn btn-danger btn-lg switch-hover" >Richiesta inviata 
+                    <a class="btn btn-danger btn-lg switch-hover" onclick="return confirm('Annullare richiesta di amicizia?');" href="index.php?page=removefriendship&friend_id={{u.id}}&back=search">Richiesta inviata 
                         <span class="glyphicon glyphicon-remove"></span>
-                    </button>                    
+                    </a>                    
                 {% elseif u.sentat and u.sender_id != user.id %}       
                     <button class="btn btn-default btn-lg switch-normal">In attesa di conferma 
                         <span class="glyphicon glyphicon-user"></span>

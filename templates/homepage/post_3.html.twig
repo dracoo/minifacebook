@@ -1,9 +1,9 @@
 <h4>
     <span class="glyphicon glyphicon-map-marker"></span> 
-    {% if user_id == user.id %}
+    {% if user_id == post.user_id %}
         {{post.firstname}} {{post.lastname}}
     {% else %}
-        <a href="#">{{post.firstname}} {{post.lastname}}</a>
+        <a href="index.php?page=profile&user_id={{post.user_id}}">{{post.firstname}} {{post.lastname}}</a>
     {% endif %}
 </h4>
 <p>

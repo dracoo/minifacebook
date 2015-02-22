@@ -2,8 +2,13 @@
 {% block body %}
     <div class="row">
         <div class="col-sm-4 jumbotron">
-            <h2>Ciao {{ user.firstname }}</h2>
-            <p>{% block h2 %}Benvenut{% if user.gender == 2 %}a{% else %}o{% endif %} su miniFacebook{% endblock%}</p>
+            <h2 {% if user.vip == "t" %} title="VIP user"{% endif %}> 
+                {% if user.vip == "t" %}
+                    <span class="glyphicon glyphicon-star"></span>
+                {% endif %}
+                Ciao {{ user.firstname }}
+            </h2>
+            <p>{% block h2 %}Benvenut{% if user.gender == "t" %}a{% else %}o{% endif %} su miniFacebook{% endblock%}</p>
         </div>
         <div class="col-sm-8">
             {% block content %}
@@ -62,7 +67,7 @@
                                             <strong>Spunta la casella di fianco al nome dell'amico che vuoi taggare</strong><br>
                                             {% for friend in friends %}
                                                 <label class="checkbox-inline">
-                                                    <input type="checkbox" id="myuser_gender_1" name="mfbpost[tag][]" value="{{ friend.id }}"> {{ friend.firstname }} {{ friend.lastname }}
+                                                    <input type="checkbox" id="mfbtag_{{ friend.id }}" name="mfbtag[]" value="{{ friend.id }}"> {{ friend.firstname }} {{ friend.lastname }}
                                                 </label>
                                             {% else %}
                                                 Non hai amici da taggare. <a href="index.php?page=search">Aggiungine qualcuno</a>!
@@ -112,8 +117,8 @@
                 </div>
                 {% for post in posts %}
                     <div class="panel panel-default">
-                        <div class="panel-body {% if loop.first %}bg-success{% endif %}">
-                            {% include "homepage\\post_" ~ post.type ~ ".html.twig" with {'post': post, 'user_id': user.id } %}
+                        <div class="panel-body">
+                            {% include "homepage\\post_" ~ post.type ~ ".html.twig" with {'post': post, 'user_id': user.id, 'comments': comments, 'tags': tags } %}
                             <div class="small text-right">{{ post.createdat|date('d/m/Y H:i:s')}}</div>
                         </div>
                     </div>

@@ -32,10 +32,17 @@ class Init {
     /**
      * 
      * @param mixed $id
+     * @param boolean $remove
      * @return mixed
      */
-    public function getSession($id) {
-        return array_key_exists($id, $_SESSION) ? $_SESSION[$id] : false;
+    public function getSession($id, $remove = false) {
+        $return = array_key_exists($id, $_SESSION) ? $_SESSION[$id] : false;
+
+        if ($return && $remove) {
+            unset($_SESSION[$id]);
+        }
+
+        return $return;
     }
 
     /**
@@ -49,7 +56,40 @@ class Init {
         return $this;
     }
 
-    public function isFriend($firstUserId, $secondUserId = null) {
+    /**
+     * 
+     * @param type $onlyActualFriends
+     * @return array
+     */
+    public function getFriends($onlyActualFriends = false) {
+        $dbconn = $this->getConn();
+        $user = $this->checkLogin();
+        /* retrieve friends */
+        $sql = 'SELECT u.id, u.firstname, u.lastname, f.sender_id, f.sentat, f.acceptedat FROM "user" AS u
+                LEFT OUTER JOIN friend AS f ON ((u.id = f.sender_id  AND f.receiver_id = $1)  OR (u.id = f.receiver_id AND f.sender_id = $1))
+                WHERE u.id <> $1';
+
+        if ($onlyActualFriends) {
+            $sql .= ' AND f.sentat IS NOT NULL AND f.acceptedat IS NOT NULL';
+        }
+
+
+        $sql .= ' ORDER BY u.lastname, u.firstname';
+        pg_prepare($dbconn, "getUser", $sql);
+
+        $users = pg_execute($dbconn, "getUser", array($user['id']));
+
+        return pg_fetch_all($users);
+    }
+
+    /**
+     * 
+     * @param type $firstUserId
+     * @param type $secondUserId
+     * @param type $actualFriends
+     * @return boolean
+     */
+    public function isFriend($firstUserId, $secondUserId = null, $actualFriends = false) {
         $user_id = $this->getSession('user_id');
         if (!$secondUserId) {
             if (!$user_id) {
@@ -59,13 +99,28 @@ class Init {
             }
         }
 
-        $sql = "SELECT 1 AS check FROM friend WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $3 AND receiver_id = $4)";
-        pg_prepare($this->getConn(), "getFriend", $sql);
+        $row = $this->getFriendship($firstUserId, $secondUserId);
 
-        $result = pg_execute($this->getConn(), "getFriend", array($firstUserId, $secondUserId, $secondUserId, $firstUserId));
-        $row = pg_fetch_row($result);
-        
+        if ($actualFriends && $row) {
+            return $row['acceptedat'] && $row['sentat'];
+        }
+
         return $row ? true : false;
+    }
+
+    public function getFriendship($firstUserId, $secondUserId) {
+        $sql = "SELECT * FROM friend WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)";
+        pg_prepare($this->getConn(), "", $sql);
+        $result = pg_execute($this->getConn(), "", array($firstUserId, $secondUserId));
+        $row = pg_fetch_assoc($result);
+
+        return $row ? $row : false;
+    }
+    
+    public function isVip() {
+        $user = $this->checkLogin();
+        
+        return $user['vip'] == "t";
     }
 
     public function getUser($id = null) {

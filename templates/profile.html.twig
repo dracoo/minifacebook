@@ -1,0 +1,76 @@
+{% extends "homepage.html.twig"%}
+{% block body %}
+    <div class="jumbotron friend-list ">
+        <div class="col-xs-9 col-table-cell col-middle">
+            <h1 class="no-margin">{{ profileUser.firstname }} {{ profileUser.lastname }}</h1>
+        </div>
+        <div class="col-xs-3 col-table-cell col-middle text-right switch">
+            {% if friendship.sentat and friendship.acceptedat %}
+                <button class="btn btn-lg btn-primary switch-normal">Amici 
+                    <span class="glyphicon glyphicon-ok"></span>
+                </button>
+                <a class="btn btn-lg btn-danger switch-hover" onclick="return confirm('Eliminare dagli amici?');" href="index.php?page=removefriendship&friend_id={{profileUser.id}}">Amici 
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            {% elseif friendship.sentat and friendship.sender_id == user.id %}
+                <button class="btn btn-default btn-lg switch-normal">Richiesta inviata 
+                    <span class="glyphicon glyphicon-ok"></span>
+                </button>
+                <a class="btn btn-danger btn-lg switch-hover" onclick="return confirm('Annullare richiesta di amicizia?');" href="index.php?page=removefriendship&friend_id={{profileUser.id}}">Richiesta inviata 
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>                    
+            {% elseif friendship.sentat and friendship.sender_id != user.id %}       
+                <button class="btn btn-default btn-lg switch-normal">In attesa di conferma 
+                    <span class="glyphicon glyphicon-user"></span>
+                </button>
+                <a class="btn btn-primary btn-lg switch-hover" href="index.php?page=friendrequest">Vai alla pagina "Richieste di amicizia"
+                    <span class="glyphicon glyphicon-user"></span>
+                </a> 
+            {% else %}
+                <a class="btn btn-primary btn-lg" href="index.php?page=profile&user_id={{ profileUser.id }}&ask=1">Richiedi amicizia <span class="glyphicon glyphicon-user"></span></a>
+                {% endif %}
+        </div>
+    </div>
+    {% if friendship and friendship.sentat and friendship.acceptedat %}
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h2>Dati anagrafici</h2>
+                        <strong>Email</strong>: <a href="mailto:{{ profileUser.email }}">{{ profileUser.email }}</a><br>
+                        {% if profileUser.birthdate %}
+                            <strong>Data di nascita</strong>: {{ profileUser.birthdate|date('d/m/Y') }}<br>
+                        {% endif %}
+                        {% if profileUser.birthplace %}
+                            <strong>Luogo di nascita</strong>: {{ profileUser.birthplace }}<br>
+                        {% endif %}
+                        {% if profileUser.gender == "f" %}
+                            <strong>Sesso</strong>: Uomo<br>
+                        {% elseif profileUser.gender == "t" %}
+                            <strong>Sesso</strong>: Donna<br>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% if profileUser.domicile_city or profileUser.domicile_province or profileUser.domicile_state %}
+                <div class="col-sm-6">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h2>Residenza</h2>
+                            {% if profileUser.domicile_city %}
+                                <strong>Città</strong>: {{ profileUser.domicile_city }}<br>
+                            {% endif %}
+                            {% if profileUser.domicile_province %}
+                                <strong>Provincia</strong>: {{ profileUser.domicile_province }}<br>
+                            {% endif %}
+                            {% if profileUser.domicile_state %}
+                                <strong>Stato</strong>: {{ profileUser.domicile_state }}<br>
+                            {% endif %} 
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

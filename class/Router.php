@@ -89,6 +89,16 @@ class Router {
             $return = $this->init->pgSelect('user', array('email' => $email, 'password' => md5($password)));
             if ($return && array_key_exists('id', $return[0]) && $return[0]['id']) { /* L'utente esiste */
                 $this->init->setSession('user_id', $return[0]['id']);
+
+                /* CHECK VIP */
+                $friends = $this->init->getFriends(true);
+
+                if ($friends && count($friends) >= 3) {
+                    pg_update($this->init->getConn(), 'user', array('vip' => true), array('id' => $return[0]['id']));
+                } else {
+                    pg_update($this->init->getConn(), 'user', array('vip' => false), array('id' => $return[0]['id']));
+                }
+
                 $this->init->gotoHomepage();
                 return;
             } else {
@@ -159,7 +169,24 @@ class Router {
             $okay = true;
         }
 
+        if ($type == self::MFPOST_FOTO) {
+            $post = filter_input_array(INPUT_POST);
+            $mfbtag = (array) $post['mfbtag'];
+            if ($mfbtag) {
+                $this->insertTag($mfbtag, $newId, $user['id']);
+            }
+        }
+
+
         return array($errors, $okay);
+    }
+
+    private function insertTag($mfbtag, $post_id, $post_user_id) {
+        foreach ($mfbtag as $tag) {
+            if ($this->init->isFriend($tag, $post_user_id, true)) {
+                $this->init->pgInsert('tag', array('tagged_id' => $tag, 'post_id' => $post_id, 'post_user_id' => $post_user_id));
+            }
+        }
     }
 
     public function homepageAction() {
@@ -282,8 +309,28 @@ class Router {
         $posts = pg_execute($this->init->getConn(), "getPost", array($user['id']));
         $postsRows = pg_fetch_all($posts);
 
+        $tagsWhere = array();
+        $commentsWhere = array();
 
-        $friends = $this->getFriends(true);
+        foreach ($postsRows as $pRow) {
+            if ($pRow['type'] == self::MFPOST_FOTO) {
+                $tagsWhere[] = '(t.post_id = ' . $pRow['id'] . ' AND t.post_user_id = ' . $pRow['user_id'] . ')';
+            } elseif ($pRow['type'] == self::MFPOST_STATO) {
+                $commentsWhere[] = '(c.post_id = ' . $pRow['id'] . ' AND c.post_user_id = ' . $pRow['user_id'] . ')';
+            }
+        }
+
+        /* retrieve tag */
+        $sqlTag = 'SELECT u.firstname, u.id, t.post_id, t.post_user_id FROM tag AS t JOIN "user" AS u ON t.tagged_id = u.id WHERE ' . implode(' OR ', $tagsWhere);
+        $tagsResult = pg_query($this->init->getConn(), $sqlTag);
+        $tags = pg_fetch_all($tagsResult);
+
+        /* retrieve comment */
+        $sqlComment = 'SELECT u.firstname, u.id, c.* FROM comment AS c JOIN "user" AS u ON c.responder_id = u.id WHERE ' . implode(' OR ', $commentsWhere) . ' ORDER BY c.createdat ASC';
+        $commentsResult = pg_query($this->init->getConn(), $sqlComment);
+        $comments = pg_fetch_all($commentsResult);
+
+        $friends = $this->init->getFriends(true);
 
         return $this->render('homepage.html.twig', array(
                     'user' => $user,
@@ -295,29 +342,10 @@ class Router {
                     'luogoErrors' => $luogoErrors,
                     'show' => $show,
                     'posts' => $postsRows,
+                    'tags' => $tags,
+                    'comments' => $comments,
                     'friends' => $friends
         ));
-    }
-
-    private function getFriends($onlyActualFriends = false) {
-        $dbconn = $this->init->getConn();
-        $user = $this->init->checkLogin();
-        /* retrieve friends */
-        $sql = 'SELECT u.id, u.firstname, u.lastname, f.sender_id, f.sentat, f.acceptedat FROM "user" AS u
-                LEFT OUTER JOIN friend AS f ON ((u.id = f.sender_id  AND f.receiver_id = $1)  OR (u.id = f.receiver_id AND f.sender_id = $1))
-                WHERE u.id <> $1';
-        
-        if ($onlyActualFriends) {
-            $sql .= ' AND f.sentat IS NOT NULL AND f.acceptedat IS NOT NULL';
-        }
-
-
-        $sql .= ' ORDER BY u.lastname, u.firstname';
-        pg_prepare($dbconn, "getUser", $sql);
-
-        $users = pg_execute($dbconn, "getUser", array($user['id']));
-
-        return pg_fetch_all($users);
     }
 
     public function searchAction() {
@@ -331,7 +359,7 @@ class Router {
             }
         }
 
-        $usersRows = $this->getFriends();
+        $usersRows = $this->init->getFriends();
         return $this->render('search.html.twig', array('user' => $user, 'usersRows' => $usersRows));
     }
 
@@ -366,7 +394,99 @@ class Router {
 
     public function myuserAction() {
         $user = $this->init->checkLogin();
-        return $this->render('myuser.html.twig', array('user' => $user));
+        $formOrig = array('birthdate' => '', 'birthplace' => '', 'gender' => '', 'domicile_city' => '', 'domicile_province' => '', 'domicile_state' => '');
+        $okay = $this->init->getSession('myuser_okay', true);
+        $form = $formOrig;
+        $errors = array();
+        foreach ($form as $k => $v) {
+            if ($user[$k]) {
+                $tmp = $user[$k];
+                if ($k == 'birthdate') {
+                    $date = \DateTime::createFromFormat('Y-m-d', $tmp);
+                    $tmp = $date->format('d/m/Y');
+                }
+                $form[$k] = $tmp;
+            }
+        }
+
+        if ($this->isPost()) {
+            $post = filter_input_array(INPUT_POST);
+            $formMerge = array_merge($form, (array) $post['myuser']);
+            $toUpdate = array();
+
+            foreach ($formMerge as $k => $v) {
+                if (array_key_exists($k, $formOrig) && $v != $user[$k]) {
+                    if ($k == 'birthdate') {
+                        $date = \DateTime::createFromFormat('d/m/Y', $v);
+                        $v = $date->format('Y-m-d');
+                    }
+
+                    $toUpdate[$k] = $v;
+                }
+            }
+
+            if ($toUpdate) {
+                pg_update($this->init->getConn(), 'user', $toUpdate, array('id' => $user['id']));
+
+                $this->init->setSession('myuser_okay', true);
+
+                return $this->init->redirect('index.php?page=myuser');
+            }
+        }
+
+        return $this->render('myuser.html.twig', array('user' => $user, 'form' => $form, 'okay' => $okay, 'errors' => $errors));
+    }
+
+    public function removefriendshipAction() {
+        $user = $this->init->checkLogin();
+
+        $friend_id = filter_input(INPUT_GET, 'friend_id');
+        if (!$friend_id || $friend_id == $user['id']) {
+            return $this->init->gotoHomepage();
+        }
+
+        $profileUser = $this->init->getUser($friend_id);
+        if (!$profileUser) {
+            return $this->init->gotoHomepage();
+        }
+
+        $friendship = $this->init->getFriendship($friend_id, $user['id']);
+
+        if (!$friendship) {
+            return $this->init->redirect('index.php?page=profile&user_id=' . $friend_id);
+        }
+
+        pg_delete($this->init->getConn(), 'friend', $friendship);
+
+        $back = filter_input(INPUT_GET, 'back');
+        if ($back) {
+            return $this->init->redirect("index.php?page=$back");
+        }
+
+        return $this->init->redirect("index.php?page=profile&user_id=$friend_id");
+    }
+
+    public function profileAction() {
+        $user = $this->init->checkLogin();
+        $user_id = filter_input(INPUT_GET, 'user_id');
+        if (!$user_id || $user_id == $user['id']) {
+            return $this->init->gotoHomepage();
+        }
+
+        $profileUser = $this->init->getUser($user_id);
+        if (!$profileUser) {
+            return $this->init->gotoHomepage();
+        }
+
+        $ask = filter_input(INPUT_GET, 'ask');
+        if ($ask) {
+            if (!$this->init->isFriend($profileUser['id'])) {
+                $this->init->pgInsert('friend', array('sender_id' => $user['id'], 'receiver_id' => $profileUser['id'], 'sentat' => date('Y-m-d H:i:s')));
+            }
+        }
+
+        $friendship = $this->init->getFriendship($user_id, $user['id']);
+        return $this->render('profile.html.twig', array('user' => $user, 'profileUser' => $profileUser, 'friendship' => $friendship));
     }
 
     public function logoutAction() {

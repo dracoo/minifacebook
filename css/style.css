@@ -44,15 +44,19 @@ a, a:link, a:active, a:hover, a:visited, button {
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
 }
+.friend-list {
+    display: table;
+    width: 100%;
+}
 
-.friend-list .switch .switch-hover {
+.switch .switch-hover {
     display: none;
 }
 
-.friend-list .switch:hover .switch-hover {
+.switch:hover .switch-hover {
     display: inline-block;
 }
 
-.friend-list .switch:hover .switch-normal {
+.switch:hover .switch-normal {
     display: none;
 }

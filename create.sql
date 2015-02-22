@@ -33,16 +33,17 @@ ALTER TABLE "user" ADD FOREIGN KEY (favorite_place_post_id, favorite_place_post_
 
 create table "comment" (
 id serial PRIMARY KEY,
-user_id int NOT NULL,
+responder_id int NOT NULL,
 post_id int NOT NULL,
 post_user_id int NOT NULL,
 content VARCHAR(255) not null,
+createdat timestamp not null,
 FOREIGN KEY (post_id, post_user_id) REFERENCES "post" (id, user_id)
 );
 
 create table "tag" (
 id serial PRIMARY KEY,
-user_id int NOT NULL,
+tagged_id int NOT NULL,
 post_id int NOT NULL,
 post_user_id int NOT NULL,
 FOREIGN KEY (post_id, post_user_id) REFERENCES "post" (id, user_id)
